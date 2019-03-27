@@ -53,5 +53,7 @@ LIRI is a _Language_ Interpretation and Recognition Interface. LIRI will be a co
 Node Package Used
 
 * Axios
-*Spotify API
+* Spotify API
 *
+Video Link: https://youtu.be/qRZp_NEAVRs
+
