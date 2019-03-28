@@ -17,21 +17,24 @@ var data = process.argv.slice(3).join(" ");
 
 //Functions pulls concert API info from BandinTown for given artist
 function concertThis(artist){
+    var results = "Bands in Town Results\n"
     var queryURL = "https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp";
     axios.get(queryURL).then(function(response){
         var events = response.data;
-        console.log("==============================================Printing Bands in Town Results ==============================================")
+        // console.log("==============================================Printing Bands in Town Results ==============================================")
+
         for(var i = 0; i < events.length; i++){
             
-            console.log(artist + " will be performing at " + events[i].venue.name +" in " + events[i].venue.city + " on " + moment(events[i].venue.datetime).format("LLLL"))
+            results += artist + " will be performing at " + events[i].venue.name +" in " + events[i].venue.city + " on " + moment(events[i].venue.datetime).format("LLLL") + "\n"
         }
-        console.log("==========================================================================================================================================")       
+        results += "==========================="
+        appendResults(results)    
     }).catch(function(e){
- 
-        console.log("Sorry, this band does not exist in Bands in Town. Please try again.")
-
-        console.log("==========================================================================================================================================")
+        results += "Sorry, this band does not exist in Bands in Town. Please try again.\n ==========================="
+        appendResults(results)    
+     
     })
+    
 }
 
 
@@ -45,22 +48,37 @@ function spotifyThisSong (song){
             var resultsFound = (results.length > 0)
             if(resultsFound){
                 //Getting first result item 
+                
                 var track = results[0];
-                console.log("==============================================Printing Spotify Results ==============================================")
-                console.log("Track Name: " + track.name);
+
                 var artistNames = ""
                 for (var i = 0; i < track.artists.length; i++){
                     artistNames += track.artists[i].name + ", "
                 }
                 artistNames = artistNames.slice(0, -2)
-                console.log("Artists: " + artistNames);
-                console.log("Preview Link: " + track.href);
-                console.log("Album Name: " + track.album.name);
+
+                var results =  
+                `
+                Spotify Results
+                Track Name:    ${track.name}
+                Artists:  ${artistNames}
+                Preview Link: ${track.href}
+                Album Name: ${track.album.name}
+                ===============================
+                `
+                // console.log(results)
                 }
+                
             else{
-                console.log("Sorry, cannot find track information for requested song in the Spotify API. Please try again.")
+                // console.log("Sorry, cannot find track information for requested song in the Spotify API. Please try again.")
+                var results =  
+                `
+                Spotify Results
+                Sorry, cannot find track information for requested song in the Spotify API. Please try again.
+                ==============================================================================================
+                `
             }
-            console.log("==========================================================================================================================================")
+            appendResults(results)
         })
         .catch(function(err) {
             console.log(err);    
@@ -74,26 +92,37 @@ function movieThis(movie){
     axios.get(queryURL).then(function(response){
        var movieResult = response.data;
        if(movieResult.Title){
-            console.log("==============================================Printing OMDB Results ==============================================")
-            console.log("Title: " + movieResult.Title);
-            console.log("Year: " + movieResult.Year);
-            console.log("IMDB Rating: " + movieResult.imdbRating);
-
+            var rottenTomatoRating = ""
             if(movieResult.Ratings[1]){
-                console.log("Rotten Tomatoes Rating: " + movieResult.Ratings[1].Value);
+                rottenTomatoRating = movieResult.Ratings[1].Value;
             }else{
-                console.log("Rotten Tomatoes Rating: N/A" );
+                rottenTomatoRating = "N/A";
             }
 
-            console.log("Country Produced: " + movieResult.Country);
-            console.log("Lanauages: " + movieResult.Title);
-            console.log("Plot: " + movieResult.Plot);
-            console.log("Actors: " + movieResult.Actors);
+
+            var results = 
+            `
+            OMDB Results
+            Title Name: ${movieResult.Title}
+            Year:  ${movieResult.Year}
+            IMDB Rating: ${movieResult.imdbRating}
+            Rotten Tomato Rating: ${rottenTomatoRating }
+            Country Produced: ${movieResult.Country}      
+            Languages: ${movieResult.Languages}     
+            Plot: ${movieResult.Plot}
+            Actors: ${movieResult.Actors}
+            ===============================           
+             `
        }
        else{
-        console.log("Sorry, this movie does not exist in OMDB API. Please try again.")
+        var results = 
+        `
+        OMDB Results
+        Sorry, this movie does not exist in OMDB API. Please try again.
+        ===============================================================
+        `
        }
-       console.log("==========================================================================================================================================")
+       appendResults(results)
     }).catch(function(e){
         console.log(e)
     })
@@ -130,7 +159,23 @@ function doWhatItSays(){
     })
 }
 
+
+function appendResults(r){
+
+    console.log(r);
+
+    fs.appendFile("log.txt", r+"\n", function(error){
+        if(error) {console.log(error)}
+        else{ console.log("Results has been added!")}
+    })
+}
+
 function main(){
+
+    fs.appendFile("log.txt", command+ " " + data +"\n", function(error){
+        if(error) {console.log(error)}
+        else{ console.log("Command has been added!")}
+    })
 
     if (command === "concert-this"){;
         concertThis(data)
